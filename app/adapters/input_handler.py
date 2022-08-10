@@ -16,18 +16,11 @@ processor = PowerToolsBatch.BatchProcessor(event_type=PowerToolsBatch.EventType.
 
 def update_invoice(record: PowerToolsSqs.SQSRecord):
     logger.set_correlation_id(record.message_id)
-    
+
     input_schema = get_schema("adapters/input_schema.json")
-    PowerToolsValidation.validate(
-        event=json.loads(record.body),
-        schema=input_schema)
-    invoice = PowerToolsParser.parse(
-        event=record.body,
-        model=DomainTypes.InvoiceData)
-    DomainRules.process(
-        logger,
-        invoice
-    )
+    PowerToolsValidation.validate(event=json.loads(record.body), schema=input_schema)
+    invoice = PowerToolsParser.parse(event=record.body, model=DomainTypes.InvoiceData)
+    DomainRules.process(logger, invoice)
 
 
 @PowerToolsBatch.batch_processor(record_handler=update_invoice, processor=processor)
@@ -39,5 +32,5 @@ def update_invoices(event, context):
 
 @cachetools.func.ttl_cache(maxsize=10240, ttl=3600)
 def get_schema(schema_name: str) -> dict:
-    with open(schema_name, 'r') as file:
+    with open(schema_name, "r") as file:
         return json.load(file)

@@ -12,29 +12,28 @@ class InvoiceRepository:
         if dynamo_resource is None:
             dynamo_resource = boto3.resource("dynamodb", region_name="sa-east-1")
         self.dynamo_table = dynamo_resource.Table("invoice")
-        
-    def update_invoice(self,
-                       invoice_id: int,
-                       customer_id: int,
-                       invoice_quantity: int,
-                       invoice_unit_price: float,
-                       invoice_total_price: float,
-                       invoice_comment: str):
+
+    def update_invoice(
+        self,
+        invoice_id: int,
+        customer_id: int,
+        invoice_quantity: int,
+        invoice_unit_price: float,
+        invoice_total_price: float,
+        invoice_comment: str,
+    ):
         try:
-            invoice_comment_aux = invoice_comment if invoice_comment else "" 
+            invoice_comment_aux = invoice_comment if invoice_comment else ""
             item = {
-                'invoice_id': invoice_id,
-                'customer_id': customer_id,
-                'invoice_quantiyy': invoice_quantity,
-                'invoice_unit_price': str(invoice_unit_price),
-                'invoice_total_price': str(invoice_total_price),
-                'invoice_comment': invoice_comment_aux
+                "invoice_id": invoice_id,
+                "customer_id": customer_id,
+                "invoice_quantiyy": invoice_quantity,
+                "invoice_unit_price": str(invoice_unit_price),
+                "invoice_total_price": str(invoice_total_price),
+                "invoice_comment": invoice_comment_aux,
             }
             result = self.dynamo_table.put_item(Item=item)
-            self.logger.info({
-                "DynamoDb item updated": item,
-                "result": result})
+            self.logger.info({"DynamoDb item updated": item, "result": result})
         except Exception as error:
-            self.logger.exception({
-                "DynamoDb item failed": item})
+            self.logger.exception({"DynamoDb item failed": item})
             raise error
