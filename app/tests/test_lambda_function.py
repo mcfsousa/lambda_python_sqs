@@ -1,9 +1,9 @@
 import json
 import unittest
 import boto3
-from moto import mock_dynamodb
+import moto
 import lambda_function
-from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
+import aws_lambda_powertools.utilities.batch as PowerToolsBatch
 
 MESSAGE_ID_1="f3a3c25a-f244-44ab-8f54-27e28e261ed9"
 MESSAGE_ID_2="f3a3c25a-f244-44ab-8f54-27e28e261ed8"
@@ -48,7 +48,7 @@ class InvoiceTest(unittest.TestCase):
             ]
         }
                 
-    @mock_dynamodb
+    @moto.mock_dynamodb
     def test_lambda_function_success(self):
         self.create_table()
         
@@ -73,7 +73,7 @@ class InvoiceTest(unittest.TestCase):
         response = lambda_function.lambda_handler(event=payload,context=None)
         assert response == { "batchItemFailures": [] }
         
-    @mock_dynamodb
+    @moto.mock_dynamodb
     def test_lambda_function_partial_success(self):
         self.create_table()
         body1 = {
@@ -96,7 +96,7 @@ class InvoiceTest(unittest.TestCase):
         response = lambda_function.lambda_handler(event=payload,context=None)
         assert response == { "batchItemFailures": [{'itemIdentifier': MESSAGE_ID_1}] }
               
-    @mock_dynamodb
+    @moto.mock_dynamodb
     def test_lambda_function_fail(self):
         self.create_table()
         
@@ -117,7 +117,7 @@ class InvoiceTest(unittest.TestCase):
         }
         payload=self.create_payload(body1,body2)
         self.assertRaises(
-            BatchProcessingError,
+            PowerToolsBatch.exceptions.BatchProcessingError,
             lambda_function.lambda_handler,
             event=payload,
             context=None)

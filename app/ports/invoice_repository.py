@@ -1,11 +1,12 @@
 import boto3
-from aws_lambda_powertools import Logger
+import aws_lambda_powertools as PowerToolsLog
+
 
 dynamo_resource = None
 
 
 class InvoiceRepository:
-    def __init__(self, _logger: Logger):
+    def __init__(self, _logger: PowerToolsLog.Logger):
         global dynamo_resource
         self.logger = _logger
         if dynamo_resource is None:
