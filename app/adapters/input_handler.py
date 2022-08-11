@@ -11,19 +11,27 @@ import domain.invoicedata as DomainTypes
 import domain.lambda_domain as DomainRules
 
 logger = PowerToolsLog.Logger(service="InvoiceUpdate")
-processor = PowerToolsBatch.BatchProcessor(event_type=PowerToolsBatch.EventType.SQS)
+processor = PowerToolsBatch.BatchProcessor(
+    event_type=PowerToolsBatch.EventType.SQS
+)
 
 
 def update_invoice(record: PowerToolsSqs.SQSRecord):
     logger.set_correlation_id(record.message_id)
 
     input_schema = get_schema("adapters/input_schema.json")
-    PowerToolsValidation.validate(event=json.loads(record.body), schema=input_schema)
-    invoice = PowerToolsParser.parse(event=record.body, model=DomainTypes.InvoiceData)
+    PowerToolsValidation.validate(
+        event=json.loads(record.body), schema=input_schema
+    )
+    invoice = PowerToolsParser.parse(
+        event=record.body, model=DomainTypes.InvoiceData
+    )
     DomainRules.process(logger, invoice)
 
 
-@PowerToolsBatch.batch_processor(record_handler=update_invoice, processor=processor)
+@PowerToolsBatch.batch_processor(
+    record_handler=update_invoice, processor=processor
+)
 def update_invoices(event, context):
     return_value = processor.response()
     logger.info(return_value)

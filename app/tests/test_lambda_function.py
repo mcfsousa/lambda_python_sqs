@@ -86,7 +86,9 @@ class InvoiceTest(unittest.TestCase):
 
         payload = self.create_payload(body1, body2)
         response = lambda_function.lambda_handler(event=payload, context=None)
-        assert response == {"batchItemFailures": [{"itemIdentifier": MESSAGE_ID_1}]}
+        assert response == {
+            "batchItemFailures": [{"itemIdentifier": MESSAGE_ID_1}]
+        }
 
     @moto.mock_dynamodb
     def test_lambda_function_fail(self):
